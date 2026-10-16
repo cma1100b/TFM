@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: CC-BY-4.0
+
+# IDE directories and files
+
+.vscode/**/*
+
+.project
+.cproject
+
+# Compilation directories
+build/**/*
+out/**/*
+
+# Output files
+*.pdf
+*.zip
+*.gz
+
+# Compilation files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc

@@ -1,0 +1,53 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% Main style package any document
+%
+% Copyright (c) 2026 Carlos Madrid
+%
+
+% Package declaration
+
+\ProvidesPackage{cstyle}[2026/10/14 v1.0 Carlos Madrid Document Style]
+
+% Packages
+
+%% Geometry
+\RequirePackage{geometry}
+\geometry{a4paper, margin=25mm}
+
+%% Fonts
+\RequirePackage{fontspec}
+\RequirePackage{unicode-math}
+\RequirePackage{libertine}
+\RequirePackage{inconsolata}
+
+%% Language TODO: This should be decided in each document
+\RequirePackage[spanish]{babel}
+
+%% Graphics
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+
+%% Structure
+\RequirePackage{titlesec}
+\RequirePackage[titletoc]{appendix}
+\RequirePackage{etoolbox}
+\RequirePackage{fancyhdr}
+\RequirePackage{lastpage}
+\RequirePackage{booktabs}
+
+%% Code
+\RequirePackage{listings}
+
+%% Captions
+\RequirePackage{caption}
+\RequirePackage{subcaption}
+
+%% Mathem
+\RequirePackage{amsmath}
+
+%% PDF
+\RequirePackage[final]{pdfpages}
+\RequirePackage{hyperref}
+
+\endinput
