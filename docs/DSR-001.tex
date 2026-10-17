@@ -1,0 +1,153 @@
+\documentclass{article}
+
+\usepackage{cstyle}
+
+\title{Espsecificaciones para las mejoras de DSR}
+\author{
+        Carlos Madrid Espinosa \\
+        \href{mailto:carlosmadrid@uma.es}{carlosmadrid@uma.es}
+}
+
+\begin{document}
+
+\maketitle
+
+\section*{Versiones}\label{sec:ver}
+
+\begin{table}[h]\label{tab:ver-versions}
+        \begin{tabular}{ccll}
+                \toprule
+                Version & Iteración & Lista de Cambios & Fecha  \\
+                \midrule
+                01      & 00        & Version inicial. & \today \\
+                \bottomrule
+        \end{tabular}
+        \caption{Versiones del documento}
+\end{table}
+
+\tableofcontents
+
+\newpage
+%\twocolumn
+
+\section{Introducción}\label{sec:intro}
+
+Este documento recoge las necesidades detectadas para la actualización del
+sistema DSR (Deep State Representation). Estas se usará como base para el
+planteamiento de una base de rerquisitos.
+
+\section{Planteamiento}\label{sec:scope}
+
+El Grupo de Ingeniería de Sistemas Integrados de la Universidad de Málaga
+cuenta con diversos sistemas, como robots asistenciales y entornos
+inteligentes, que comparten una necesidad común: disponer de una representación
+del entorno que pueda utilizarse internamente para la toma de decisiones y la
+monitorización. Cada sistema agrupa diferentes elementos de los que es
+necesario registrar información. Por ejemplo, en el caso de un robot
+asistencial que interactúa con una persona, es preciso registrar datos
+específicos de esta (como su identificación), tener en cuenta variables
+ambientales (hora, temperatura, humedad, etc.) y registrar la propia
+interacción entre la persona y el robot para poder generar acciones adecuadas.
+
+Para dar respuesta a esto, se emplea DSR (Deep State Representation), un
+sistema de modelado de información basado en estructurar los componentes del
+sistema y sus relaciones en forma de grafo, compuesto por nodos y aristas. De
+este modo, cada elemento se representa como un nodo con una serie de atributos
+que lo caracterizan, mientras que las relaciones se definen mediante las
+aristas, las cuales también disponen de atributos para especificar mejor dicha
+conexión.
+
+Un aspecto fundamental de DSR es que actúa puramente como un modelo; por sí
+solo, ni genera ni almacena la información por cuenta propia. Para ello,
+proporciona una API que cualquier sistema puede utilizar para leer o escribir
+en la representación del entorno. Estos componentes interactivos se denominan
+agentes, los cuales pueden asumir roles de proveedores de información o de
+consumidores de la misma.
+
+Para potenciar la independencia de los agentes, DSR presenta una arquitectura
+distribuida en la que cada agente almacena una copia local del estado. Cuando
+un agente desea realizar un cambio, envía la diferencia (delta) a un nodo
+central, el cual se encarga de propagar la actualización al resto de agentes.
+Gracias a este diseño, cada agente lee directamente de su copia local, lo que
+reduce drásticamente el número de peticiones necesarias y permite que el
+sistema continúe operando con normalidad incluso si se interrumpe temporalmente
+la conectividad.
+
+\section{Problemas detectados}\label{sec:problems}
+
+El sistema actual presenta dos problemas fundamentales derivados principalmente
+de la implementación \textit{adhoc} actual del modelo de grafo:
+
+\begin{itemize}
+        \item \textbf{Velocidad:} La implementación actual del grafo es una
+              solución \textit{adhoc} excesivamente compleja que penaliza el
+              rendimiento, aportando poca flexibilidad y resultando demasiado
+              lenta en la práctica, lo que desincentiva su uso en muchos
+              escenarios.
+        \item \textbf{Pérdida de datos y divergencia:} Al actualizar al resto de
+              sistemas, se producen episodios donde algún dato se pierde.
+              Esto provoca que el resto de componentes descarten la
+              actualización, haciendo que la información de DSR en los distintos
+              agentes derive y se desincronice con el tiempo.
+\end{itemize}
+
+\section{Propuesta}\label{sec:proposition}
+
+Para resolver los problemas de rendimiento y complejidad del modelo de grafo,
+se propone \textbf{sustituir la implementación \textit{adhoc} actual por una
+        librería de gestión de grafos ya existente y contrastada}, mitigando así los
+cuellos de botella y ganando flexibilidad.
+
+En cuanto a la pérdida de datos y la sincronización, se plantean tres enfoques
+arquitectónicos principales:
+\begin{enumerate}
+        \item \textbf{Copias distribuidas completas:} Mantener las copias del
+              DSR en cada agente, comunicándose todos entre sí de forma
+              totalmente mallada.
+        \item \textbf{DSR Centralizado (Cliente/Servidor):} Hacer que los
+              agentes lean y escriban directamente de un DSR centralizado,
+              organizándose en una topología en estrella.
+        \item \textbf{Solución mixta:} Combinar agentes con copia local y
+              agentes ligeros sin copia. Los agentes con DSR se mantienen
+              conectados entre sí, mientras que los agentes sin copia consultan
+              a cualquiera de los nodos que sí disponen de ella.
+\end{enumerate}
+
+El \textbf{tercer enfoque (solución mixta)} se postula como la mejor opción, ya
+que proporciona la máxima flexibilidad operativa adaptándose mejor a las
+necesidades reales de los diferentes subsistemas.
+
+Adicionalmente, para mitigar los problemas de divergencia de datos entre
+copias, se propone:
+\begin{itemize}
+        \item \textbf{Mecanismos de integridad (CRC):} Introducir sumas de
+              verificación o códigos de redundancia cíclica (CRC) en las
+              estructuras del sistema para detectar alteraciones o
+              discrepancias de forma temprana.
+        \item \textbf{Agente de supervisión de red:} Incorporar un mecanismo
+              basado en un agente especial de control cuya función específica
+              sea monitorizar la red, validar la consistencia de los grafos y
+              detectar posibles derivas de información entre nodos.
+\end{itemize}
+
+\section{Requisitos de Portabilidad y Embedabilidad}\label{sec:portability}
+
+Dado que el sistema va a desplegarse en una amplia variedad de plataformas y
+dispositivos heterogéneos, se establecen como pilares fundamentales de diseño
+los siguientes aspectos:
+
+\begin{itemize}
+        \item \textbf{Portabilidad:} El código debe ser altamente portable,
+              facilitando su compilación y ejecución en diferentes entornos
+              mediante el uso de cadenas de herramientas basadas en LLVM
+              (tales como \texttt{clang} o \texttt{clangd}) y el apoyo en
+              librerías estándar multisistema compatibles con POSIX.
+        \item \textbf{Embedabilidad y eficiencia:} Con el fin de permitir su
+              integración en sistemas con recursos limitados o embebidos,
+              la arquitectura debe mantenerse lo más ligera y mínima posible,
+              priorizando en todo momento la eficiencia computacional y el bajo
+              consumo de memoria.
+\end{itemize}
+
+\end{document}
+

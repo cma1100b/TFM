@@ -9,12 +9,12 @@ LATEXFLAGS  = -lualatex -interaction=nonstopmode -file-line-error
 CFGD        = config
 OUTD        = out
 OBJD        = build
-SRCD        = src
+SRCD        = docs
 
 export TEXINPUTS := $(CFGD)//:
 
-SRCS        = $(shell find $(SRCD) -name "*.tex" -type f)
-OBJS        = $(SRCS:$(SRCD)/%.tex=$(OBJD)/%.pdf)
+SRCS        = $(wildcard $(SRCD)/*.tex)
+OBJS       := $(SRCS:$(SRCD)/%.tex=$(OBJD)/%.pdf)
 STYF        = $(wildcard $(CFGD)/*.sty)
 
 TARGET      = $(OUTD)/main.pdf
