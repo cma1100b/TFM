@@ -1,0 +1,43 @@
+% SPDX-License-Identifier: CC-BY-4.0
+%
+% Style package for Requirements
+%
+% Copyright (c) 2026 Carlos Madrid
+%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{creq}[2026/10/16 v1.0 Carlos Madrid Requirements Style]
+
+\RequirePackage{tabularx}
+\RequirePackage{booktabs}
+\RequirePackage{xcolor}
+\RequirePackage{pgfkeys}
+\RequirePackage{xparse}
+
+% Define keys for requirement metadata
+\pgfkeys{
+        requirement/.cd,
+        id/.store in=\myreq@id,
+        name/.store in=\myreq@name,
+        type/.store in=\myreq@type,
+        rationale/.store in=\myreq@rationale,
+        verification/.store in=\myreq@verification,
+}
+
+% Define the requirement environment
+% #1: Key-value metadata pairs
+% #2: Environment body (acts as the Description)
+\NewDocumentEnvironment{requirement}{m +b}{%
+        \pgfkeys{requirement/.cd, #1}%
+        \par\noindent
+        \begin{tabularx}{\textwidth}{lXlX}
+                \toprule
+                \textbf{ID:}           & \myreq@id                                               & \textbf{Type:} & \myreq@type \\ \midrule
+                \textbf{Name:}         & \multicolumn{3}{l|}{\myreq@name}                                                       \\ \midrule
+                \textbf{Description:}  & \multicolumn{3}{p{0.82\textwidth}}{#2}                                                 \\ \midrule
+                \textbf{Rationale:}    & \multicolumn{3}{p{0.82\textwidth}}{\myreq@rationale}                                   \\ \midrule
+                \textbf{Verification:} & \multicolumn{3}{p{0.82\textwidth}}{\myreq@verification}                                \\ \bottomrule
+        \end{tabularx}
+        \vspace{1em}
+}{%
+}
